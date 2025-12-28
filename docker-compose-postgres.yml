@@ -11,7 +11,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - /var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
   temporal:
     container_name: temporal
     depends_on:
@@ -51,6 +51,16 @@ services:
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
       - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+      
+      - TEMPORAL_AUTH_ENABLED=true
+      
+      - TEMPORAL_AUTH_PROVIDER_URL=https://authentik.corebit.ca/application/o/temporal/
+      - TEMPORAL_AUTH_CALLBACK_URL=https://temporal.corebit.ca/auth/sso/callback
+      - TEMPORAL_AUTH_LOGOUT_URL=https://authentik.corebit.ca/application/o/temporal/end-session/
+
+      - TEMPORAL_AUTH_CLIENT_ID=${TEMPORAL_AUTH_CLIENT_ID}
+      - TEMPORAL_AUTH_CLIENT_SECRET=${TEMPORAL_AUTH_CLIENT_SECRET}
+      - TEMPORAL_AUTH_SCOPES=openid profile email
     image: temporalio/ui:${TEMPORAL_UI_VERSION}
     networks:
       - temporal-network
@@ -60,3 +70,5 @@ networks:
   temporal-network:
     driver: bridge
     name: temporal-network
+volumes:
+  postgres-data:
